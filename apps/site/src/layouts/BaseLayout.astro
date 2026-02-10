@@ -1,0 +1,52 @@
+---
+const { title = "Type-safe URL query state | query-guard" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Type-safe URL querystring state for TypeScript apps. Dependency-free core with optional React hook and Zod resolver."
+    />
+    <meta
+      name="keywords"
+      content="querystring, search-params, url-state, typescript, react, zod, history"
+    />
+
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://query-guard.liha.dev/" />
+    <meta property="og:title" content="query-guard - Type-safe URL query state" />
+    <meta
+      property="og:description"
+      content="Dependency-free core for typed URL query state with optional React hook and Zod resolver."
+    />
+    <meta property="og:image" content="https://query-guard.liha.dev/og-image.jpg" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://query-guard.liha.dev/" />
+    <meta property="twitter:title" content="query-guard - Type-safe URL query state" />
+    <meta
+      property="twitter:description"
+      content="Dependency-free core for typed URL query state with optional React hook and Zod resolver."
+    />
+    <meta property="twitter:image" content="https://query-guard.liha.dev/og-image.jpg" />
+
+    <title>{title}</title>
+    <link rel="icon" href="/liha-lab-logo.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400..700&family=Plus+Jakarta+Sans:wght@400..800&family=Source+Code+Pro:wght@400..700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

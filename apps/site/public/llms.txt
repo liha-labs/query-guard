@@ -1,0 +1,22 @@
+# query-guard
+
+- [Documentation](https://query-guard.liha.dev/)
+- [Full Documentation for AI](https://query-guard.liha.dev/llms-full.txt)
+- [Repository](https://github.com/liha-labs/query-guard)
+
+## Quick Start
+
+```ts
+import { createBrowserAdapter, createQueryGuard } from 'query-guard'
+
+const resolver = {
+  resolve: ({ raw }) => ({ value: { q: raw.q ?? '' } }),
+  serialize: (value) => ({ q: value.q })
+}
+
+const guard = createQueryGuard({
+  adapter: createBrowserAdapter(),
+  resolver,
+  defaultValue: { q: '' }
+})
+```

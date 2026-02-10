@@ -1,0 +1,49 @@
+# query-guard Full Documentation
+
+query-guard is a dependency-free core for type-safe URL query state. It relies on URLSearchParams and a Resolver that maps raw query values to typed state and back.
+
+## Install
+
+```
+pnpm add query-guard
+```
+
+## Core Concepts
+- Adapter: provides getSearch/setSearch/subscribe for the environment.
+- Resolver: maps raw query values to typed state and serializes back.
+- QueryRaw: Record<string, string | string[]> derived from URLSearchParams.
+
+## Quick Start
+
+```ts
+import { createBrowserAdapter, createQueryGuard } from 'query-guard'
+
+const resolver = {
+  resolve: ({ raw }) => ({ value: { page: Number(raw.page ?? 1) } }),
+  serialize: (value) => ({ page: String(value.page) })
+}
+
+const guard = createQueryGuard({
+  adapter: createBrowserAdapter(),
+  resolver,
+  defaultValue: { page: 1 }
+})
+```
+
+## React
+Use the dedicated React package:
+
+```
+pnpm add @liha-labs/query-guard-react react
+```
+
+## Zod Resolver
+Use the dedicated resolver package:
+
+```
+pnpm add @liha-labs/query-guard-resolvers zod
+```
+
+## SSR / History Notes
+- createBrowserAdapter is browser-only and throws when window is undefined.
+- createBrowserAdapter subscribes only to popstate; external pushState/replaceState does not notify.
