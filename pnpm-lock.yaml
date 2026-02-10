@@ -18,6 +18,16 @@ importers:
         specifier: ^5.5.4
         version: 5.9.3
 
+  packages/query-guard:
+    dependencies:
+      '@liha-labs/query-guard':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      typescript:
+        specifier: ^5.5.4
+        version: 5.9.3
+
   packages/react:
     dependencies:
       '@liha-labs/query-guard':

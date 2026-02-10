@@ -1,0 +1,50 @@
+{
+  "name": "query-guard",
+  "version": "0.1.0",
+  "description": "Type-safe URL search params (querystring) state (alias of @liha-labs/query-guard).",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "keywords": [
+    "url",
+    "querystring",
+    "search-params",
+    "query-params",
+    "url-state",
+    "history",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/liha-labs/query-guard.git"
+  },
+  "homepage": "https://github.com/liha-labs/query-guard",
+  "bugs": {
+    "url": "https://github.com/liha-labs/query-guard/issues"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@liha-labs/query-guard": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}

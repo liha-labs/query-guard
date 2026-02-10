@@ -7,6 +7,8 @@ Core is dependency-free, with optional React hook and Zod resolver packages.
 All packages are ESM-only and ship `exports` with `import` + `types`.
 
 ## Packages
+- `query-guard`  
+Core-only alias of `@liha-labs/query-guard` (convenience package).
 - `@liha-labs/query-guard`  
 Core: `createQueryGuard`, `createBrowserAdapter`, and types. No dependencies.
 - `@liha-labs/query-guard-react`  
@@ -16,6 +18,7 @@ Resolvers: `zodResolver` (this package is the only one that depends on `zod`).
 
 Install (pnpm):
 ```sh
+pnpm add query-guard
 pnpm add @liha-labs/query-guard
 pnpm add @liha-labs/query-guard-react react
 pnpm add @liha-labs/query-guard-resolvers zod
@@ -24,7 +27,7 @@ pnpm add @liha-labs/query-guard-resolvers zod
 ## Quick Start
 ```tsx
 import { QueryGuardProvider, useQueryGuard } from '@liha-labs/query-guard-react'
-import { createBrowserAdapter } from '@liha-labs/query-guard'
+import { createBrowserAdapter } from 'query-guard'
 import { zodResolver } from '@liha-labs/query-guard-resolvers'
 import { z } from 'zod'
 
