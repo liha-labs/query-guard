@@ -1,6 +1,7 @@
 import type { QueryGuard, QueryGuardOptions } from '@liha-labs/query-guard'
-import { createQueryGuard } from '@liha-labs/query-guard'
-import { useMemo, useRef, useSyncExternalStore } from 'react'
+import { createBrowserAdapter, createQueryGuard } from '@liha-labs/query-guard'
+import { useContext, useMemo, useRef, useSyncExternalStore } from 'react'
+import { QueryGuardConfigContext } from './provider'
 
 type Snapshot<T extends Record<string, unknown>> = {
   queries: T
@@ -16,6 +17,9 @@ type Snapshot<T extends Record<string, unknown>> = {
  * - T is constrained to object-like types because updates are key-based.
  * - Realtime updates depend on the adapter implementation.
  * - For SSR, do not use `createBrowserAdapter`. Provide a custom adapter instead.
+ * - If no adapter is provided and no Provider exists:
+ *   - browser: `createBrowserAdapter()` is used
+ *   - non-browser: throws to avoid SSR misuse
  *
  * @example
  * ```tsx
@@ -32,15 +36,38 @@ type Snapshot<T extends Record<string, unknown>> = {
 export const useQueryGuard = <T extends Record<string, unknown>>(
   options: QueryGuardOptions<T>
 ) => {
+  const config = useContext(QueryGuardConfigContext)
+
+  const resolvedAdapter = useMemo(() => {
+    if (options.adapter) return options.adapter
+    if (config?.adapter) return config.adapter
+    if (typeof window === 'undefined') {
+      throw new Error(
+        'useQueryGuard: adapter is required in non-browser environments.'
+      )
+    }
+    return createBrowserAdapter()
+  }, [options.adapter, config?.adapter])
+
+  const resolvedHistory = options.history ?? config?.history
+  const resolvedUnknownPolicy = options.unknownPolicy ?? config?.unknownPolicy
+
   const guard: QueryGuard<T> = useMemo(
-    () => createQueryGuard(options),
+    () =>
+      createQueryGuard({
+        adapter: resolvedAdapter,
+        resolver: options.resolver,
+        defaultValue: options.defaultValue,
+        history: resolvedHistory,
+        unknownPolicy: resolvedUnknownPolicy,
+      }),
     [
       // adapter/resolver/defaultValue の参照が変わると作り直す（MVP）
-      options.adapter,
+      resolvedAdapter,
       options.resolver,
       options.defaultValue,
-      options.unknownPolicy,
-      options.history,
+      resolvedUnknownPolicy,
+      resolvedHistory,
     ]
   )
 

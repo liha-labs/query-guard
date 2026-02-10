@@ -23,38 +23,27 @@ pnpm add @liha-labs/query-guard-resolvers zod
 
 ## Quick Start
 ```tsx
-import { createBrowserAdapter, createQueryGuard } from '@liha-labs/query-guard'
-import { useQueryGuard } from '@liha-labs/query-guard-react'
-import { z } from 'zod'
+import { QueryGuardProvider, useQueryGuard } from '@liha-labs/query-guard-react'
+import { createBrowserAdapter } from '@liha-labs/query-guard'
 import { zodResolver } from '@liha-labs/query-guard-resolvers'
+import { z } from 'zod'
 
-const resolver = zodResolver(
-  z.object({
-    page: z.coerce.number().int().min(1).default(1),
-    q: z.string().default(''),
-  }),
-  { defaultValue: { page: 1, q: '' } }
-)
-
-const guard = createQueryGuard({
-  adapter: createBrowserAdapter(),
-  resolver,
-  defaultValue: { page: 1, q: '' },
-  unknownPolicy: 'keep',
-})
+const adapter = createBrowserAdapter()
+const schema = z.object({ page: z.coerce.number().int().min(1).catch(1) })
+const defaultValue = { page: 1 }
+const resolver = zodResolver(schema, { defaultValue })
 
 function App() {
-  const { queries, set } = useQueryGuard({
-    adapter: createBrowserAdapter(),
-    resolver,
-    defaultValue: { page: 1, q: '' },
-  })
-
   return (
-    <button onClick={() => set({ page: queries.page + 1 })}>
-      Next page
-    </button>
+    <QueryGuardProvider adapter={adapter} history="replace" unknownPolicy="keep">
+      <Pager />
+    </QueryGuardProvider>
   )
+}
+
+function Pager() {
+  const { queries, set } = useQueryGuard({ resolver, defaultValue })
+  return <button onClick={() => set({ page: queries.page + 1 })}>Next</button>
 }
 ```
 
@@ -76,11 +65,11 @@ Your app-facing, typed object state.
 
 ## SSR
 - `createBrowserAdapter` is browser-only and throws when `window` is undefined.
-- In SSR/non-browser environments, provide a custom adapter.
+- In SSR/non-browser environments, provide a custom adapter via Provider or hook options.
 
 ## API (Overview)
 - Core: `createQueryGuard`, `createBrowserAdapter`, `QueryGuardAdapter`, `QueryResolver`, `QueryRaw`, `QueryGuardOptions`
-- React: `useQueryGuard`
+- React: `QueryGuardProvider`, `useQueryGuard`
 - Resolvers: `zodResolver`
 
 Details are in TypeScript types and JSDoc for each package.
