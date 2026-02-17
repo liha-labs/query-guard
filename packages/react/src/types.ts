@@ -1,4 +1,5 @@
 import type {
+  QueryGuardOptions,
   QueryGuardAdapter,
   QueryHistoryMode,
   UnknownPolicy,
@@ -14,3 +15,6 @@ export type QueryGuardConfig = {
 export type QueryGuardProviderProps = QueryGuardConfig & {
   children: ReactNode
 }
+
+export type UseQueryGuardOptions<T extends Record<string, unknown>> =
+  Partial<QueryGuardOptions<T>>
