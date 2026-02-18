@@ -1,0 +1,148 @@
+name: Release query-guard
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - run: pnpm install --no-frozen-lockfile
+
+      - name: Build packages
+        run: |
+          pnpm -r \
+            --filter @liha-labs/query-guard \
+            --filter @liha-labs/query-guard-react \
+            --filter @liha-labs/query-guard-resolvers \
+            --filter query-guard \
+            build
+
+      - name: Publish @liha-labs/query-guard (core) (OIDC)
+        working-directory: packages/core
+        env:
+          NODE_AUTH_TOKEN: ''
+          NPM_TOKEN: ''
+          NPM_CONFIG_USERCONFIG: /dev/null
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+
+          if npm view @liha-labs/query-guard@"$VERSION" version >/dev/null 2>&1; then
+            echo "Already published: @liha-labs/query-guard@$VERSION"
+            exit 0
+          fi
+
+          npm publish --access public --provenance
+
+      - name: Wait for core to be visible on npm
+        shell: bash
+        run: |
+          VERSION="$(node -p "require('./packages/core/package.json').version")"
+          echo "Waiting for @liha-labs/query-guard@$VERSION ..."
+          for i in {1..30}; do
+            if npm view @liha-labs/query-guard@"$VERSION" version >/dev/null 2>&1; then
+              echo "OK: visible on npm"
+              exit 0
+            fi
+            echo "not yet... ($i/30)"
+            sleep 5
+          done
+          echo "ERROR: @liha-labs/query-guard@$VERSION not visible after waiting"
+          exit 1
+
+      # ★ここが肝：workspace:* を CI 内で semver に変換（コミットしない）
+      - name: Sync workspace deps to published version (CI only)
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+
+          const core = JSON.parse(fs.readFileSync('packages/core/package.json', 'utf8'));
+          const version = core.version;
+
+          const targets = [
+            { path: 'packages/react/package.json', dep: '@liha-labs/query-guard', setVersion: true },
+            { path: 'packages/resolvers/package.json', dep: '@liha-labs/query-guard', setVersion: true },
+            { path: 'packages/query-guard/package.json', dep: '@liha-labs/query-guard', setVersion: true },
+          ];
+
+          for (const t of targets) {
+            const pkg = JSON.parse(fs.readFileSync(t.path, 'utf8'));
+            if (t.setVersion) pkg.version = version; // 全部同じバージョン運用ならこれがラク
+            pkg.dependencies ??= {};
+            pkg.dependencies[t.dep] = `^${version}`;
+            fs.writeFileSync(t.path, JSON.stringify(pkg, null, 2) + '\n');
+            console.log('synced', t.path, '->', `^${version}`);
+          }
+          NODE
+
+      - name: Publish @liha-labs/query-guard-react (OIDC)
+        working-directory: packages/react
+        env:
+          NODE_AUTH_TOKEN: ''
+          NPM_TOKEN: ''
+          NPM_CONFIG_USERCONFIG: /dev/null
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+
+          if npm view @liha-labs/query-guard-react@"$VERSION" version >/dev/null 2>&1; then
+            echo "Already published: @liha-labs/query-guard-react@$VERSION"
+            exit 0
+          fi
+
+          npm publish --access public --provenance
+
+      - name: Publish @liha-labs/query-guard-resolvers (OIDC)
+        working-directory: packages/resolvers
+        env:
+          NODE_AUTH_TOKEN: ''
+          NPM_TOKEN: ''
+          NPM_CONFIG_USERCONFIG: /dev/null
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+
+          if npm view @liha-labs/query-guard-resolvers@"$VERSION" version >/dev/null 2>&1; then
+            echo "Already published: @liha-labs/query-guard-resolvers@$VERSION"
+            exit 0
+          fi
+
+          npm publish --access public --provenance
+
+      - name: Publish query-guard (alias) (OIDC)
+        working-directory: packages/query-guard
+        env:
+          NODE_AUTH_TOKEN: ''
+          NPM_TOKEN: ''
+          NPM_CONFIG_USERCONFIG: /dev/null
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+
+          # 念のため：本体が見えてないならaliasは出さない
+          if ! npm view @liha-labs/query-guard@"$VERSION" version >/dev/null 2>&1; then
+            echo "Skip: @liha-labs/query-guard@$VERSION is not visible on npm yet"
+            exit 0
+          fi
+
+          if npm view query-guard@"$VERSION" version >/dev/null 2>&1; then
+            echo "Already published: query-guard@$VERSION"
+            exit 0
+          fi
+
+          npm publish --access public --provenance
