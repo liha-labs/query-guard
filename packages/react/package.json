@@ -17,6 +17,15 @@
   },
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/liha-labs/query-guard"
+  },
+  "homepage": "https://github.com/liha-labs/query-guard",
+  "bugs": {
+    "url": "https://github.com/liha-labs/query-guard/issues"
+  },
+  "license": "MIT",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit"
