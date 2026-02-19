@@ -29,13 +29,15 @@ export const QueryGuardConfigContext =
  */
 export const QueryGuardProvider = ({
   adapter,
+  resolver,
+  defaultValue,
   history,
   unknownPolicy,
   children,
 }: QueryGuardProviderProps) => {
   const value = useMemo(
-    () => ({ adapter, history, unknownPolicy }),
-    [adapter, history, unknownPolicy]
+    () => ({ adapter, resolver, defaultValue, history, unknownPolicy }),
+    [adapter, resolver, defaultValue, history, unknownPolicy]
   )
   return createElement(QueryGuardConfigContext.Provider, { value }, children)
 }

@@ -1,4 +1,4 @@
-import type { QueryGuard } from '@liha-labs/query-guard'
+import type { QueryGuard, QueryRaw, QueryResolver } from '@liha-labs/query-guard'
 import { createBrowserAdapter, createQueryGuard } from '@liha-labs/query-guard'
 import { useContext, useMemo, useRef, useSyncExternalStore } from 'react'
 import { QueryGuardConfigContext } from './provider'
@@ -9,6 +9,25 @@ type Snapshot<T extends Record<string, unknown>> = {
   raw: ReturnType<QueryGuard<T>['getRaw']>
   meta: ReturnType<QueryGuard<T>['getMeta']>
   search: ReturnType<QueryGuard<T>['getSearch']>
+}
+
+const fallbackResolver: QueryResolver<Record<string, unknown>> = {
+  resolve({ raw }) {
+    return { value: raw as unknown as Record<string, unknown> }
+  },
+  serialize(value) {
+    const next: QueryRaw = {}
+    for (const [key, rawValue] of Object.entries(value)) {
+      if (rawValue === undefined) continue
+      if (Array.isArray(rawValue)) {
+        next[key] = rawValue.map((v) => String(v))
+        continue
+      }
+      if (rawValue === null) continue
+      next[key] = String(rawValue)
+    }
+    return next
+  },
 }
 
 /**
@@ -52,29 +71,34 @@ export const useQueryGuard = <T extends Record<string, unknown>>(
   }, [adapter, config?.adapter])
 
   const resolvedHistory = history ?? config?.history
-  const resolvedUnknownPolicy = unknownPolicy ?? config?.unknownPolicy
+  const explicitDefaultValue =
+    (defaultValue as T | undefined) ?? (config?.defaultValue as T | undefined)
+  const requestedUnknownPolicy = unknownPolicy ?? config?.unknownPolicy
+  const resolvedUnknownPolicy =
+    explicitDefaultValue || requestedUnknownPolicy !== 'drop'
+      ? requestedUnknownPolicy
+      : 'keep'
+  const resolvedResolver =
+    (resolver as QueryResolver<T> | undefined) ??
+    (config?.resolver as QueryResolver<T> | undefined) ??
+    (fallbackResolver as QueryResolver<T>)
+  const resolvedDefaultValue =
+    explicitDefaultValue ?? ({} as T)
 
   const guard: QueryGuard<T> = useMemo(
-    () => {
-      if (!resolver) {
-        throw new Error('useQueryGuard: resolver is required.')
-      }
-      if (!defaultValue) {
-        throw new Error('useQueryGuard: defaultValue is required.')
-      }
-      return createQueryGuard({
+    () =>
+      createQueryGuard({
         adapter: resolvedAdapter,
-        resolver,
-        defaultValue,
+        resolver: resolvedResolver,
+        defaultValue: resolvedDefaultValue,
         history: resolvedHistory,
         unknownPolicy: resolvedUnknownPolicy,
-      })
-    },
+      }),
     [
       // adapter/resolver/defaultValue の参照が変わると作り直す（MVP）
       resolvedAdapter,
-      resolver,
-      defaultValue,
+      resolvedResolver,
+      resolvedDefaultValue,
       resolvedUnknownPolicy,
       resolvedHistory,
     ]
