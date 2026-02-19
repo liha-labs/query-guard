@@ -8,7 +8,7 @@ export const QueryGuardConfigContext =
  * Provider for default query-guard config in React.
  *
  * @remarks
- * - Use this to avoid passing `adapter`/`history`/`unknownPolicy` on every hook.
+ * - Use this to avoid passing `adapter`/`resolver`/`defaultValue`/`history`/`unknownPolicy` on every hook.
  * - For SSR, provide a custom adapter via this provider or hook options.
  *
  * @example

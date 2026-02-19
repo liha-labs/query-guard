@@ -37,9 +37,14 @@ const fallbackResolver: QueryResolver<Record<string, unknown>> = {
  * - T is constrained to object-like types because updates are key-based.
  * - Realtime updates depend on the adapter implementation.
  * - For SSR, do not use `createBrowserAdapter`. Provide a custom adapter instead.
+ * - Resolution order: hook options -> Provider config -> fallback.
  * - If no adapter is provided and no Provider exists:
  *   - browser: `createBrowserAdapter()` is used
  *   - non-browser: throws to avoid SSR misuse
+ * - If no resolver/defaultValue are provided:
+ *   - resolver: passthrough fallback is used
+ *   - defaultValue: `{}` is used
+ * - If `unknownPolicy` is `drop` without any defaultValue, it falls back to `keep`.
  *
  * @example
  * ```tsx
