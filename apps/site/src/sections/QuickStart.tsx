@@ -43,7 +43,7 @@ const resolver = {
 }
   `.trim()
 
-const policyCode = `
+  const policyCode = `
 const guard = createQueryGuard({
   adapter: createBrowserAdapter(),
   resolver,
@@ -89,7 +89,7 @@ const schema = z.object({
   q: z.string().default('')
 })
 
-const resolver = zodResolver(schema, { defaultValue: { page: 1, q: '' } })
+const resolver = zodResolver(schema)
 
 const guard = createQueryGuard({
   adapter: createBrowserAdapter(),

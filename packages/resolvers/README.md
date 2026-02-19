@@ -11,6 +11,7 @@ Uses Zod to parse raw query values into typed objects.
 ### Behavior
 - Raw values (`string` / `string[]`) are passed to Zod as-is.
 - Use `z.coerce` for number/boolean conversions.
+- If schema defaults are defined, the second argument is optional.
 - `object -> raw` conversion stringifies non-primitive objects via `JSON.stringify`.
 - If `JSON.stringify` returns `undefined`, the key is skipped.
 
@@ -24,7 +25,6 @@ const resolver = zodResolver(
     page: z.coerce.number().int().min(1).default(1),
     q: z.string().default(''),
     tags: z.array(z.string()).default([]),
-  }),
-  { defaultValue: { page: 1, q: '', tags: [] } }
+  })
 )
 ```

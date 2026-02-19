@@ -6,7 +6,7 @@ import type {
 import { z } from 'zod'
 
 type Options<T> = {
-  defaultValue: T
+  defaultValue?: T
 }
 
 /**
@@ -26,21 +26,31 @@ type Options<T> = {
  *   z.object({
  *     page: z.coerce.number().int().min(1).default(1),
  *     q: z.string().default(''),
- *   }),
- *   { defaultValue: { page: 1, q: '' } }
+ *   })
  * )
  * ```
  */
 export const zodResolver = <TSchema extends z.ZodTypeAny>(
   schema: TSchema,
-  options: Options<z.infer<TSchema>>
+  options?: Options<z.infer<TSchema>>
 ): QueryResolver<z.infer<TSchema>> => {
+  const parsedDefault = schema.safeParse({})
+  const inferredDefault = parsedDefault.success
+    ? parsedDefault.data
+    : undefined
+
   return {
     resolve(input): ResolveResult<z.infer<TSchema>> {
       const parsed = schema.safeParse(rawToObject(input.raw))
       if (!parsed.success) {
+        const fallback = options?.defaultValue ?? inferredDefault
+        if (fallback === undefined) {
+          throw new Error(
+            'zodResolver: defaultValue is required when schema has no defaults.'
+          )
+        }
         return {
-          value: options.defaultValue,
+          value: fallback,
           meta: {
             usedDefault: true,
             issues: parsed.error.issues.map((i) => ({

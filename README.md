@@ -27,14 +27,14 @@ pnpm add @liha-labs/query-guard-resolvers zod
 ## Quick Start
 ```tsx
 import { QueryGuardProvider, useQueryGuard } from '@liha-labs/query-guard-react'
-import { createBrowserAdapter } from 'query-guard'
+import { createBrowserAdapter } from '@liha-labs/query-guard'
 import { zodResolver } from '@liha-labs/query-guard-resolvers'
 import { z } from 'zod'
 
 const adapter = createBrowserAdapter()
 const schema = z.object({ page: z.coerce.number().int().min(1).catch(1) })
 const defaultValue = { page: 1 }
-const resolver = zodResolver(schema, { defaultValue })
+const resolver = zodResolver(schema)
 
 function App() {
   return (

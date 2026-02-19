@@ -147,8 +147,7 @@ import { z } from 'zod'
 import { zodResolver } from '@liha-labs/query-guard-resolvers'
 
 const resolver = zodResolver(
-  z.object({ page: z.coerce.number().int().min(1).default(1) }),
-  { defaultValue: { page: 1 } }
+  z.object({ page: z.coerce.number().int().min(1).default(1) })
 )
           `}
         />
