@@ -8,6 +8,6 @@ export const ENV = {
   },
   RESOURCE: {
     GITHUB: 'https://github.com/liha-labs/query-guard',
-    NPM: 'https://www.npmjs.com/package/query-guard',
+    NPM: 'https://www.npmjs.com/package/@liha-labs/query-guard',
   },
 }

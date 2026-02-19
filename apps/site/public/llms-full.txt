@@ -5,7 +5,7 @@ query-guard is a dependency-free core for type-safe URL query state. It relies o
 ## Install
 
 ```
-pnpm add query-guard
+pnpm add @liha-labs/query-guard
 ```
 
 ## Core Concepts
@@ -16,7 +16,7 @@ pnpm add query-guard
 ## Quick Start
 
 ```ts
-import { createBrowserAdapter, createQueryGuard } from 'query-guard'
+import { createBrowserAdapter, createQueryGuard } from '@liha-labs/query-guard'
 
 const resolver = {
   resolve: ({ raw }) => ({ value: { page: Number(raw.page ?? 1) } }),

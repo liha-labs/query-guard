@@ -17,7 +17,7 @@ export const Usage = () => {
         <CodeEditor
           filename="guard.ts"
           code={`
-import { createBrowserAdapter, createQueryGuard } from 'query-guard'
+import { createBrowserAdapter, createQueryGuard } from '@liha-labs/query-guard'
 
 const resolver = {
   resolve: ({ raw }) => ({ value: { q: raw.q ?? '' } }),
@@ -88,27 +88,83 @@ const guard = createQueryGuard({
       <div className={styles.subSection}>
         <h3 className={styles.subTitle}>React Hook</h3>
         <p className={styles.desc}>
-          Provider で Adapter を共有すれば、<code>useQueryGuard</code> は最小オプションで使えます。
+          実運用では Provider に共通設定を集約し、画面ごとの差分だけ hook 側で上書きするのが分かりやすいです。
         </p>
         <CodeEditor
-          filename="react.tsx"
+          filename="react-provider.tsx"
           code={`
 import { QueryGuardProvider, useQueryGuard } from '@liha-labs/query-guard-react'
-import { createBrowserAdapter } from 'query-guard'
+import { createBrowserAdapter } from '@liha-labs/query-guard'
 
 const adapter = createBrowserAdapter()
+const resolver = {
+  resolve: ({ raw }) => ({
+    value: { page: Number(raw.page ?? 1), q: String(raw.q ?? '') }
+  }),
+  serialize: (value) => ({
+    page: String(value.page),
+    q: value.q
+  })
+}
 
 function App() {
   return (
-    <QueryGuardProvider adapter={adapter} history="replace" unknownPolicy="keep">
+    <QueryGuardProvider
+      adapter={adapter}
+      resolver={resolver}
+      defaultValue={{ page: 1, q: '' }}
+      history="replace"
+      unknownPolicy="keep"
+    >
       <Pager />
     </QueryGuardProvider>
   )
 }
 
 function Pager() {
-  const { queries, set } = useQueryGuard({ resolver, defaultValue })
+  // Provider から resolver/defaultValue を引き継ぐ
+  const { queries, set } = useQueryGuard<{ page: number; q: string }>()
   return <button onClick={() => set({ page: queries.page + 1 })}>Next</button>
+}
+          `}
+        />
+      </div>
+
+      <div className={styles.subSection}>
+        <h3 className={styles.subTitle}>React: Hook options で部分上書き</h3>
+        <p className={styles.desc}>
+          Provider の設定をベースにしつつ、1画面だけ history を変えたい場合の例です。
+        </p>
+        <CodeEditor
+          filename="react-override.tsx"
+          code={`
+import { useQueryGuard } from '@liha-labs/query-guard-react'
+
+function SearchPage() {
+  const { queries, set } = useQueryGuard<{ page: number; q: string }>({
+    history: 'push' // Provider の history をこの hook だけ上書き
+  })
+
+  const onSubmit = (nextQ: string) => set({ q: nextQ, page: 1 })
+  return <button onClick={() => onSubmit('react')}>Search</button>
+}
+          `}
+        />
+      </div>
+
+      <div className={styles.subSection}>
+        <h3 className={styles.subTitle}>React: options なしで使う場合</h3>
+        <p className={styles.desc}>
+          何も渡さない場合は fallback が使われます。プロトタイピング向けで、実運用では Resolver の明示を推奨します。
+        </p>
+        <CodeEditor
+          filename="react-minimal.tsx"
+          code={`
+function Prototype() {
+  const { queries, set } = useQueryGuard()
+  // fallback resolver: raw 値をそのまま扱う
+  // fallback defaultValue: {}
+  return <button onClick={() => set({ page: '2' })}>{String(queries.page ?? '1')}</button>
 }
           `}
         />

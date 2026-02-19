@@ -26,21 +26,66 @@ export const Examples = () => {
           filename="react.tsx"
           code={`
 import { QueryGuardProvider, useQueryGuard } from '@liha-labs/query-guard-react'
-import { createBrowserAdapter } from 'query-guard'
+import { createBrowserAdapter } from '@liha-labs/query-guard'
 
 const adapter = createBrowserAdapter()
+const resolver = {
+  resolve: ({ raw }) => ({
+    value: { page: Number(raw.page ?? 1), q: String(raw.q ?? '') }
+  }),
+  serialize: (value) => ({
+    page: String(value.page),
+    q: value.q
+  })
+}
 
 function App() {
   return (
-    <QueryGuardProvider adapter={adapter} history="replace" unknownPolicy="keep">
+    <QueryGuardProvider
+      adapter={adapter}
+      resolver={resolver}
+      defaultValue={{ page: 1, q: '' }}
+      history="replace"
+      unknownPolicy="keep"
+    >
       <Pager />
     </QueryGuardProvider>
   )
 }
 
 function Pager() {
-  const { queries, set } = useQueryGuard({ resolver, defaultValue })
+  const { queries, set } = useQueryGuard<{ page: number; q: string }>()
   return <button onClick={() => set({ page: queries.page + 1 })}>Next</button>
+}
+          `}
+        />
+      </div>
+
+      <div className={styles.exampleBlock} id="examples-react-override">
+        <header className={styles.exampleHeader}>
+          <div className={styles.titleArea}>
+            <h3 className={styles.exampleTitle}>Hook Override</h3>
+            <div className={styles.chips}>
+              <span>react</span>
+              <span>override</span>
+            </div>
+          </div>
+          <p className={styles.exampleDesc}>
+            Provider をベースにしつつ、一部オプションだけ hook 側で上書きできます。
+          </p>
+        </header>
+        <CodeEditor
+          filename="react-override.tsx"
+          code={`
+import { useQueryGuard } from '@liha-labs/query-guard-react'
+
+function SearchPage() {
+  const { queries, set } = useQueryGuard<{ page: number; q: string }>({
+    history: 'push'
+  })
+
+  const goNext = () => set({ page: queries.page + 1 })
+  return <button onClick={goNext}>Next</button>
 }
           `}
         />
@@ -62,6 +107,13 @@ function Pager() {
         <CodeEditor
           filename="policy.ts"
           code={`
+import { createBrowserAdapter, createQueryGuard } from '@liha-labs/query-guard'
+
+const resolver = {
+  resolve: ({ raw }) => ({ value: { page: Number(raw.page ?? 1) } }),
+  serialize: (value) => ({ page: String(value.page) })
+}
+
 const guard = createQueryGuard({
   adapter: createBrowserAdapter(),
   resolver,
@@ -116,19 +168,33 @@ const resolver = zodResolver(
           </p>
         </header>
         <CodeEditor
-          filename="adapter.ts"
+          filename="ssr-react.tsx"
           code={`
+import { QueryGuardProvider, useQueryGuard } from '@liha-labs/query-guard-react'
+
 const adapter = {
   getSearch: () => '?page=1',
   setSearch: () => {},
   subscribe: () => () => {}
 }
 
-const guard = createQueryGuard({
-  adapter,
-  resolver,
-  defaultValue: { page: 1 }
-})
+const resolver = {
+  resolve: ({ raw }) => ({ value: { page: Number(raw.page ?? 1) } }),
+  serialize: (value) => ({ page: String(value.page) })
+}
+
+function Page() {
+  return (
+    <QueryGuardProvider adapter={adapter} resolver={resolver} defaultValue={{ page: 1 }}>
+      <Inner />
+    </QueryGuardProvider>
+  )
+}
+
+function Inner() {
+  const { queries } = useQueryGuard<{ page: number }>()
+  return <p>{queries.page}</p>
+}
           `}
         />
       </div>

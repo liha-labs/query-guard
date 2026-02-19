@@ -7,7 +7,7 @@
 ## Quick Start
 
 ```ts
-import { createBrowserAdapter, createQueryGuard } from 'query-guard'
+import { createBrowserAdapter, createQueryGuard } from '@liha-labs/query-guard'
 
 const resolver = {
   resolve: ({ raw }) => ({ value: { q: raw.q ?? '' } }),

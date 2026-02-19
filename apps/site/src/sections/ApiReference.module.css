@@ -29,6 +29,10 @@
   overflow-x: auto;
 }
 
+.signature {
+  margin-bottom: 2rem;
+}
+
 .methodList {
   display: flex;
   flex-direction: column;

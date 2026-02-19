@@ -19,7 +19,9 @@ export const ApiReference = () => {
 
       <div className={styles.refBlock} id="reference-adapter">
         <h3 className={styles.refTitle}>createBrowserAdapter()</h3>
-        <p className={styles.refDesc}>ブラウザ用 Adapter。popstate のみ購読します。</p>
+        <p className={styles.refDesc}>
+          ブラウザ用 Adapter。popstate を購読し、adapter 経由の setSearch 時にも通知します。
+        </p>
         <div className={styles.signature}>
           <code>createBrowserAdapter(): QueryGuardAdapter</code>
         </div>
@@ -101,6 +103,43 @@ export const ApiReference = () => {
             <div className={styles.propDetail}>
               <code>Record&lt;string, string | string[]&gt;</code>
               <p>URLSearchParams から得られる raw データ形式です。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.refBlock} id="reference-react">
+        <h3 className={styles.refTitle}>React API</h3>
+        <div className={styles.signature}>
+          <code>useQueryGuard&lt;T&gt;(options?: UseQueryGuardOptions&lt;T&gt;)</code>
+        </div>
+        <div className={styles.propGrid}>
+          <div className={styles.propRow}>
+            <div className={styles.propName}>QueryGuardProvider</div>
+            <div className={styles.propDetail}>
+              <p>
+                <code>adapter</code> / <code>resolver</code> / <code>defaultValue</code> / <code>history</code> / <code>unknownPolicy</code>
+                を全 hook に配布します。
+              </p>
+            </div>
+          </div>
+          <div className={styles.propRow}>
+            <div className={styles.propName}>Resolution order</div>
+            <div className={styles.propDetail}>
+              <p>hook options → Provider → fallback の順で解決されます。</p>
+            </div>
+          </div>
+          <div className={styles.propRow}>
+            <div className={styles.propName}>Fallback</div>
+            <div className={styles.propDetail}>
+              <p>
+                adapter は browser なら <code>createBrowserAdapter()</code>。resolver は passthrough、
+                defaultValue は <code>{'{}'}</code>。defaultValue が無い状態で <code>unknownPolicy: 'drop'</code>{' '}
+                が要求された場合は <code>'keep'</code> にフォールバックします。
+              </p>
+              <p>
+                non-browser 環境で adapter が未指定の場合、<code>useQueryGuard</code> はエラーを投げます。
+              </p>
             </div>
           </div>
         </div>

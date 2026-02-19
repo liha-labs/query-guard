@@ -2,10 +2,10 @@ import { CodeEditor } from '../components'
 import styles from './Hero.module.css'
 
 export const Hero = () => {
-  const installCmd = 'pnpm add query-guard'
+  const installCmd = 'pnpm add @liha-labs/query-guard'
 
   const sampleCode = `
-import { createBrowserAdapter, createQueryGuard } from 'query-guard'
+import { createBrowserAdapter, createQueryGuard } from '@liha-labs/query-guard'
 
 const resolver = {
   resolve: ({ raw }) => ({

@@ -2,10 +2,12 @@ import { CodeEditor, Section } from '../components'
 import styles from './QuickStart.module.css'
 
 export const QuickStart = () => {
-  const installCode = `pnpm add query-guard`
+  const installCoreCode = `pnpm add @liha-labs/query-guard`
+  const installReactCode = `pnpm add @liha-labs/query-guard-react react`
+  const installZodCode = `pnpm add @liha-labs/query-guard-resolvers zod`
 
   const minimalCode = `
-import { createBrowserAdapter, createQueryGuard } from 'query-guard'
+import { createBrowserAdapter, createQueryGuard } from '@liha-labs/query-guard'
 
 const resolver = {
   resolve: ({ raw }) => ({ value: { q: raw.q ?? '' } }),
@@ -41,7 +43,7 @@ const resolver = {
 }
   `.trim()
 
-  const policyCode = `
+const policyCode = `
 const guard = createQueryGuard({
   adapter: createBrowserAdapter(),
   resolver,
@@ -50,7 +52,50 @@ const guard = createQueryGuard({
 })
 
 // URL上の未知キーを落として保存
-await guard.set({ page: 2 })
+guard.set({ page: 2 })
+  `.trim()
+
+  const reactCode = `
+import { QueryGuardProvider, useQueryGuard } from '@liha-labs/query-guard-react'
+import { createBrowserAdapter } from '@liha-labs/query-guard'
+
+const adapter = createBrowserAdapter()
+const resolver = {
+  resolve: ({ raw }) => ({ value: { page: Number(raw.page ?? 1) } }),
+  serialize: (value) => ({ page: String(value.page) })
+}
+
+function App() {
+  return (
+    <QueryGuardProvider adapter={adapter} resolver={resolver} defaultValue={{ page: 1 }}>
+      <Pager />
+    </QueryGuardProvider>
+  )
+}
+
+function Pager() {
+  const { queries, set } = useQueryGuard<{ page: number }>()
+  return <button onClick={() => set({ page: queries.page + 1 })}>Next</button>
+}
+  `.trim()
+
+  const zodCode = `
+import { z } from 'zod'
+import { createBrowserAdapter, createQueryGuard } from '@liha-labs/query-guard'
+import { zodResolver } from '@liha-labs/query-guard-resolvers'
+
+const schema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  q: z.string().default('')
+})
+
+const resolver = zodResolver(schema, { defaultValue: { page: 1, q: '' } })
+
+const guard = createQueryGuard({
+  adapter: createBrowserAdapter(),
+  resolver,
+  defaultValue: { page: 1, q: '' }
+})
   `.trim()
 
   return (
@@ -63,16 +108,16 @@ await guard.set({ page: 2 })
       <div className={styles.step}>
         <div className={styles.stepInfo}>
           <span className={styles.stepNumber}>STEP 01</span>
-          <h4>Install</h4>
+          <h4>Install Core</h4>
           <p>
-            標準として <code>pnpm</code> を推奨します。
+            まずコアパッケージを追加します。
           </p>
         </div>
         <CodeEditor
-          code={`$ ${installCode}`}
+          code={`$ ${installCoreCode}`}
           lang="bash"
           withHeader={false}
-          filename="install"
+          filename="install-core"
         />
       </div>
 
@@ -101,6 +146,40 @@ await guard.set({ page: 2 })
           <p>未知のキーを保持するか、落とすかを選択できます。</p>
         </div>
         <CodeEditor code={policyCode} filename="policy.ts" />
+      </div>
+
+      <div className={styles.step}>
+        <div className={styles.stepInfo}>
+          <span className={styles.stepNumber}>STEP 05</span>
+          <h4>React Integration</h4>
+          <p>
+            React では <code>@liha-labs/query-guard-react</code> を追加し、Provider + Hook で使います。
+          </p>
+        </div>
+        <CodeEditor
+          code={`$ ${installReactCode}`}
+          lang="bash"
+          withHeader={false}
+          filename="install-react"
+        />
+        <CodeEditor code={reactCode} filename="react.tsx" />
+      </div>
+
+      <div className={styles.step}>
+        <div className={styles.stepInfo}>
+          <span className={styles.stepNumber}>STEP 06</span>
+          <h4>Zod Resolver</h4>
+          <p>
+            検証や型変換を入れる場合は <code>@liha-labs/query-guard-resolvers</code> を利用します。
+          </p>
+        </div>
+        <CodeEditor
+          code={`$ ${installZodCode}`}
+          lang="bash"
+          withHeader={false}
+          filename="install-zod"
+        />
+        <CodeEditor code={zodCode} filename="zod.ts" />
       </div>
     </Section>
   )
