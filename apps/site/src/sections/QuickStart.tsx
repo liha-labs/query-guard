@@ -162,7 +162,9 @@ const guard = createQueryGuard({
           withHeader={false}
           filename="install-react"
         />
-        <CodeEditor code={reactCode} filename="react.tsx" />
+        <div className={styles.codeStackGap}>
+          <CodeEditor code={reactCode} filename="react.tsx" />
+        </div>
       </div>
 
       <div className={styles.step}>
@@ -179,7 +181,9 @@ const guard = createQueryGuard({
           withHeader={false}
           filename="install-zod"
         />
-        <CodeEditor code={zodCode} filename="zod.ts" />
+        <div className={styles.codeStackGap}>
+          <CodeEditor code={zodCode} filename="zod.ts" />
+        </div>
       </div>
     </Section>
   )
